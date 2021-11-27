@@ -5,6 +5,10 @@ import Header from '../components/Header';
 import { fetchTrivia, sendInfosPlayer } from '../redux/actions';
 import './Trivia.css';
 
+const encodeUtf8 = (string) => {
+  const stringUTF = unescape(encodeURIComponent(string));
+  return stringUTF.replace(/&quot;|&#039;/gi, '\'');
+};
 class Trivia extends Component {
   constructor(props) {
     super(props);
@@ -19,7 +23,6 @@ class Trivia extends Component {
         gravatarEmail: emailFromGlobalState,
       },
     };
-
     this.Content = this.Content.bind(this);
     this.handleClick = this.handleClick.bind(this);
     this.updateSeconds = this.updateSeconds.bind(this);
@@ -50,9 +53,7 @@ class Trivia extends Component {
       const EASY = 1;
       const MEDIUM = 2;
       const HARD = 3;
-
       const TEN = 10;
-
       const { time, questionIndex } = this.state;
       const { questions } = this.props;
       switch (questions[questionIndex].difficulty) {
@@ -154,34 +155,42 @@ class Trivia extends Component {
     const { time, questionIndex } = this.state;
     const { category, question, correct_answer: correctAnswer,
       incorrect_answers: incorrectAnswers } = questions[questionIndex];
+    const correctAnswerElement = (
+      <button
+        data-testid="correct-answer"
+        className="correct-answer btn"
+        name="right"
+        type="button"
+        onClick={ this.handleClick }
+      >
+        { encodeUtf8(correctAnswer) }
+      </button>
+    );
+    const incorrectAnswersElement = incorrectAnswers.map((answer, i) => (
+      <button
+        key={ i }
+        data-testid={ `wrong-answer-${i}` }
+        className="wrong-answer btn"
+        name="wrong"
+        type="button"
+        onClick={ this.handleClick }
+      >
+        { encodeUtf8(answer) }
+
+      </button>
+    ));
     return (
-      <section>
-        <p data-testid="question-category">{ category }</p>
-        <p data-testid="question-text">{ question }</p>
+      <section className="section">
+        <h1 className="timer">
+          { time }
+        </h1>
+        <p className="category" data-testid="question-category">{ category }</p>
+        <p className="question" data-testid="question-text">{ encodeUtf8(question) }</p>
         <section>
-          <button
-            data-testid="correct-answer"
-            className="correct-answer"
-            name="right"
-            type="button"
-            onClick={ this.handleClick }
-          >
-            { correctAnswer }
-
-          </button>
-          { incorrectAnswers.map((answer, i) => (
-            <button
-              key={ i }
-              data-testid={ `wrong-answer-${i}` }
-              className="wrong-answer"
-              name="wrong"
-              type="button"
-              onClick={ this.handleClick }
-            >
-              { answer }
-
-            </button>
-          )) }
+          { [...incorrectAnswersElement, correctAnswerElement]
+            .sort(({ props: { children: a } }, { props: { children: b } }) => (
+              a.localeCompare(b)
+            )) }
         </section>
         <button
           onClick={ this.nextQuestion }
@@ -190,11 +199,7 @@ class Trivia extends Component {
           className="btn-next"
         >
           Próxima
-
         </button>
-        <h1>
-          { time }
-        </h1>
       </section>
     );
   }
@@ -212,20 +217,17 @@ class Trivia extends Component {
     );
   }
 }
-
 Trivia.propTypes = {
   isFetching: PropTypes.any,
   jsonToGlobalState: PropTypes.func,
   questions: PropTypes.any,
 }.isRequired;
-
 const mapDispatchToProps = (dispatch) => (
   {
     jsonToGlobalState: (token) => dispatch(fetchTrivia(token)),
     dispatchPlayerToGlobalState: (player) => dispatch(sendInfosPlayer(player)),
   }
 );
-
 const mapStateToProps = (state) => (
   {
     isFetching: state.triviaReducer.isFetching,
@@ -234,5 +236,4 @@ const mapStateToProps = (state) => (
     emailFromGlobalState: state.userReducer.gravatarEmail,
   }
 );
-
 export default connect(mapStateToProps, mapDispatchToProps)(Trivia);
