@@ -6,11 +6,9 @@ import { fetchTrivia, sendInfosPlayer } from '../redux/actions';
 import './Trivia.css';
 
 const encodeUtf8 = (string) => {
-  // função do Lucas Rodrigues Turma 08
   const stringUTF = unescape(encodeURIComponent(string));
   return stringUTF.replace(/&quot;|&#039;/gi, '\'');
 };
-
 class Trivia extends Component {
   constructor(props) {
     super(props);
@@ -25,7 +23,6 @@ class Trivia extends Component {
         gravatarEmail: emailFromGlobalState,
       },
     };
-
     this.Content = this.Content.bind(this);
     this.handleClick = this.handleClick.bind(this);
     this.updateSeconds = this.updateSeconds.bind(this);
@@ -56,9 +53,7 @@ class Trivia extends Component {
       const EASY = 1;
       const MEDIUM = 2;
       const HARD = 3;
-
       const TEN = 10;
-
       const { time, questionIndex } = this.state;
       const { questions } = this.props;
       switch (questions[questionIndex].difficulty) {
@@ -169,7 +164,6 @@ class Trivia extends Component {
         onClick={ this.handleClick }
       >
         { encodeUtf8(correctAnswer) }
-
       </button>
     );
     const incorrectAnswersElement = incorrectAnswers.map((answer, i) => (
@@ -185,7 +179,6 @@ class Trivia extends Component {
 
       </button>
     ));
-
     return (
       <section className="section">
         <h1 className="timer">
@@ -194,9 +187,10 @@ class Trivia extends Component {
         <p className="category" data-testid="question-category">{ category }</p>
         <p className="question" data-testid="question-text">{ encodeUtf8(question) }</p>
         <section>
-          { [...incorrectAnswersElement, correctAnswerElement].sort(({ props: { children: a } }, { props: { children: b } }) => (
-            a.localeCompare(b)
-          )) }
+          { [...incorrectAnswersElement, correctAnswerElement]
+            .sort(({ props: { children: a } }, { props: { children: b } }) => (
+              a.localeCompare(b)
+            )) }
         </section>
         <button
           onClick={ this.nextQuestion }
@@ -205,7 +199,6 @@ class Trivia extends Component {
           className="btn-next"
         >
           Próxima
-
         </button>
       </section>
     );
@@ -224,20 +217,17 @@ class Trivia extends Component {
     );
   }
 }
-
 Trivia.propTypes = {
   isFetching: PropTypes.any,
   jsonToGlobalState: PropTypes.func,
   questions: PropTypes.any,
 }.isRequired;
-
 const mapDispatchToProps = (dispatch) => (
   {
     jsonToGlobalState: (token) => dispatch(fetchTrivia(token)),
     dispatchPlayerToGlobalState: (player) => dispatch(sendInfosPlayer(player)),
   }
 );
-
 const mapStateToProps = (state) => (
   {
     isFetching: state.triviaReducer.isFetching,
@@ -246,5 +236,4 @@ const mapStateToProps = (state) => (
     emailFromGlobalState: state.userReducer.gravatarEmail,
   }
 );
-
 export default connect(mapStateToProps, mapDispatchToProps)(Trivia);
